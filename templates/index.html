@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+<style>
+    #panel, .flip {
+      font-size: 16px;
+      padding: 10px;
+      text-align: center;
+      background-color: #4CAF50;
+      color: white;
+      border: solid 1px #a6d8a8;
+      margin: auto;
+    }
+    
+    #panel {
+      display: none;
+    }
+</style>
+{% block content %}
+    <main>
+        <section class="mt-5" id="home">
+            <div class="container d-flex justify-content-center align-items-center">
+                <div class="background">
+                    <div class="content">
+                        <div class="row">
+                            <h1 class="text-center">Welcome to Expression Recognition</h1>
+                        </div>
+                        <div class="row">
+                            <p class="text-center">Real-time emotion recognition using AI</p>
+                        </div>
+                        <div class="row">
+                            <div id="container" class="flip">
+                                <img id="panel" src="{{ url_for('video_feed') }}" class="img-fluid" width="640" height="480">
+                            </div>                            
+                        </div>
+                        <div class="col d-flex justify-content-center">
+                            <button id="startrecogButton" class="btn btn-primary btn-sm mr-2" style="border-radius: 10px; margin-right: 2em;">Start Recognize</button>
+                            <button id="stoprecogButton" class="btn btn-primary btn-sm mr-2" style="border-radius: 10px;">Stop Recognize</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var startrecogButton = document.getElementById('startrecogButton');
+            var stoprecogButton = document.getElementById('stoprecogButton');
+            var panelElement = document.getElementById("panel");
+
+            startrecogButton.addEventListener('click', function () {
+                startRecognition();
+            });
+    
+            stoprecogButton.addEventListener('click', function () {
+                stopRecognition();
+            });
+    
+            function startRecognition() {
+                // Toggle the display property to show/hide the element
+                panelElement.style.display = "block";
+            
+                // Send a request to start recognition on the server
+                fetch('/start_recognize')
+                    .then(response => response.text())
+                    .then(data => {
+                        console.log(data);
+                        // Parse the data if it's JSON
+                        try {
+                            const jsonData = JSON.parse(data);
+                            console.log(jsonData);
+                        } catch (error) {
+                            console.error('Error parsing JSON:', error);
+                        }
+    
+                        recognitionStarted = true;
+                    })
+                    .catch(error => console.error('Error starting recognition:', error));
+            }
+    
+            function stopRecognition() {
+                // Hide the webcam feed
+                panelElement.style.display = 'none';
+    
+                // Send a request to stop recognition on the server
+                fetch('/stop_recognize')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        recognitionStarted = false;
+                    })
+                    .catch(error => console.error('Error stopping recognition:', error));
+            }
+        });
+    </script>
+{% endblock %}
